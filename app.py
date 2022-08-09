@@ -9,19 +9,22 @@ import plotly.graph_objs as go
 
 
 ###### Define your variables #####
-tabtitle = 'Titanic!'
-color1='#92A5E8'
-color2='#8E44AD'
-color3='#FFC300'
-sourceurl = 'https://www.kaggle.com/c/titanic'
-githublink = 'https://github.com/plotly-dash-apps/304-titanic-dropdown'
-
+tabtitle = 'Avocados sold by region!'
+sourceurl = 'https://www.kaggle.com/code/mohamedharris/visualizing-avocado-data-using-seaborn/notebook'
+githublink = 'https://github.com/wangweiching/304-titanic-dropdown'
 
 ###### Import a dataframe #######
-df = pd.read_csv("https://raw.githubusercontent.com/austinlasseter/plotly_dash_tutorial/master/00%20resources/titanic.csv")
-df['Female']=df['Sex'].map({'male':0, 'female':1})
-df['Cabin Class'] = df['Pclass'].map({1:'first', 2: 'second', 3:'third'})
-variables_list=['Survived', 'Female', 'Fare', 'Age']
+df = pd.read_csv("https://raw.githubusercontent.com/chainhaus/pythoncourse/master/avocado.csv")
+df['Date'] = pd.to_datetime(df['Date'])
+df['Month'] = df['Date'].dt.month
+new_cols = {'4046' : 'Small Haas', '4225' : 'Large Haas', '4770' : 'XLarge Haas'}
+df.rename(columns = new_cols, inplace = True)
+for i in ['Total Volume', 'Small Haas', 'Large Haas','XLarge Haas', 'Total Bags']:
+    df[i] = df[i].astype('int64')
+variables_list=['Small Haas', 'Large Haas', 'XLarge Haas', 'Total Volume']
+
+# print(df.info())
+# print(df.head())
 
 ########### Initiate the app
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -49,37 +52,34 @@ app.layout = html.Div([
 @app.callback(Output('display-value', 'figure'),
               [Input('dropdown', 'value')])
 def display_value(continuous_var):
-    grouped_mean=df.groupby(['Cabin Class', 'Embarked'])[continuous_var].mean()
+    grouped_mean=df.groupby(['type', 'region'])[continuous_var].mean()
     results=pd.DataFrame(grouped_mean)
-    # Create a grouped bar chart
-    mydata1 = go.Bar(
-        x=results.loc['first'].index,
-        y=results.loc['first'][continuous_var],
-        name='First Class',
-        marker=dict(color=color1)
-    )
-    mydata2 = go.Bar(
-        x=results.loc['second'].index,
-        y=results.loc['second'][continuous_var],
-        name='Second Class',
-        marker=dict(color=color2)
-    )
-    mydata3 = go.Bar(
-        x=results.loc['third'].index,
-        y=results.loc['third'][continuous_var],
-        name='Third Class',
-        marker=dict(color=color3)
-    )
-
-    mylayout = go.Layout(
-        title='Grouped bar chart',
-        xaxis = dict(title = 'Port of Embarkation'), # x-axis label
-        yaxis = dict(title = str(continuous_var)), # y-axis label
-
-    )
-    fig = go.Figure(data=[mydata1, mydata2, mydata3], layout=mylayout)
-    return fig
-
+    if continuous_var == 'Small Haas':
+        mydata = go.Figure(data=[go.Pie(labels=results.loc['conventional'].index.tolist(), values=results.loc['conventional'][continuous_var].values.tolist())])
+        mydata.update_traces(textposition="inside")
+        mydata.update_layout(
+            uniformtext_minsize=14, uniformtext_mode="hide", title="Conventional Avocado sold by region"
+        )
+    if continuous_var == 'Large Haas':
+        mydata = go.Figure(data=[go.Pie(labels=results.loc['conventional'].index.tolist(), values=results.loc['conventional'][continuous_var].values.tolist())])
+        mydata.update_traces(textposition="inside")
+        mydata.update_layout(
+            uniformtext_minsize=14, uniformtext_mode="hide", title="Conventional Avocado sold by region"
+        )
+    if continuous_var == 'XLarge Haas':
+        mydata = go.Figure(data=[go.Pie(labels=results.loc['conventional'].index.tolist(), values=results.loc['conventional'][continuous_var].values.tolist())])
+        mydata.update_traces(textposition="inside")
+        mydata.update_layout(
+            uniformtext_minsize=14, uniformtext_mode="hide", title="Conventional Avocado sold by region"
+        )
+    if continuous_var == 'Total Volume':
+        mydata = go.Figure(data=[go.Pie(labels=results.loc['conventional'].index.tolist(),
+                                        values=results.loc['conventional'][continuous_var].values.tolist())])
+        mydata.update_traces(textposition="inside")
+        mydata.update_layout(
+            uniformtext_minsize=14, uniformtext_mode="hide", title="Conventional Avocado sold by region"
+        )
+    return mydata
 
 ######### Run the app #########
 if __name__ == '__main__':
