@@ -21,8 +21,10 @@ new_cols = {'4046' : 'Small Haas', '4225' : 'Large Haas', '4770' : 'XLarge Haas'
 df.rename(columns = new_cols, inplace = True)
 for i in ['Total Volume', 'Small Haas', 'Large Haas','XLarge Haas', 'Total Bags']:
     df[i] = df[i].astype('int64')
+########### filter out TotalUS data
+df = df[(df.region != 'TotalUS')]
+###########
 variables_list=['Small Haas', 'Large Haas', 'XLarge Haas', 'Total Volume']
-
 # print(df.info())
 # print(df.head())
 
@@ -53,31 +55,32 @@ app.layout = html.Div([
               [Input('dropdown', 'value')])
 def display_value(continuous_var):
     grouped_mean=df.groupby(['type', 'region'])[continuous_var].mean()
+    grouped_mean=grouped_mean[grouped_mean.sort_values(ascending=False).index[:10]]
     results=pd.DataFrame(grouped_mean)
     if continuous_var == 'Small Haas':
         mydata = go.Figure(data=[go.Pie(labels=results.loc['conventional'].index.tolist(), values=results.loc['conventional'][continuous_var].values.tolist())])
         mydata.update_traces(textposition="inside")
         mydata.update_layout(
-            uniformtext_minsize=14, uniformtext_mode="hide", title="Conventional Avocado sold by region"
+            uniformtext_minsize=14, uniformtext_mode="hide", title="Conventional Avocado sold by Top 10 regions"
         )
     if continuous_var == 'Large Haas':
         mydata = go.Figure(data=[go.Pie(labels=results.loc['conventional'].index.tolist(), values=results.loc['conventional'][continuous_var].values.tolist())])
         mydata.update_traces(textposition="inside")
         mydata.update_layout(
-            uniformtext_minsize=14, uniformtext_mode="hide", title="Conventional Avocado sold by region"
+            uniformtext_minsize=14, uniformtext_mode="hide", title="Conventional Avocado sold by Top 10 regions"
         )
     if continuous_var == 'XLarge Haas':
         mydata = go.Figure(data=[go.Pie(labels=results.loc['conventional'].index.tolist(), values=results.loc['conventional'][continuous_var].values.tolist())])
         mydata.update_traces(textposition="inside")
         mydata.update_layout(
-            uniformtext_minsize=14, uniformtext_mode="hide", title="Conventional Avocado sold by region"
+            uniformtext_minsize=14, uniformtext_mode="hide", title="Conventional Avocado sold by Top 10 regions"
         )
     if continuous_var == 'Total Volume':
         mydata = go.Figure(data=[go.Pie(labels=results.loc['conventional'].index.tolist(),
                                         values=results.loc['conventional'][continuous_var].values.tolist())])
         mydata.update_traces(textposition="inside")
         mydata.update_layout(
-            uniformtext_minsize=14, uniformtext_mode="hide", title="Conventional Avocado sold by region"
+            uniformtext_minsize=14, uniformtext_mode="hide", title="Conventional Avocado sold by Top 10 regions"
         )
     return mydata
 
